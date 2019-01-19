@@ -1,0 +1,19 @@
+version: "2"
+services:
+  nucleus-server:
+    container_name: nucleus-server
+    restart: always
+    build: .
+    ports:
+      - "8001:8001"
+    depends_on:
+      - "mongo"
+    links:
+      - mongo
+  mongo:
+    container_name: mongo
+    image: mongo
+    volumes:
+      - ./data:/data/db
+    ports:
+      - "27017:27017"
