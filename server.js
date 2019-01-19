@@ -17,12 +17,12 @@ var allowCrossDomain = function(req, res, next) {
 app.use(bodyParser.json());
 app.use(allowCrossDomain);
 
-// mongoose.connect("mongodb://mongo:27017/nucleus");
-//const db = mongoose.connection;
-//db.on("error", console.error.bind(console, "connection error:"));
-//db.once("open", function() {
-//  require("./app/routes")(app, db);
-app.listen(port, () => {
-  console.log("We are live on localhost:" + port);
+mongoose.connect("mongodb://mongo:27017/nucleus");
+const db = mongoose.connection;
+db.on("error", console.error.bind(console, "connection error:"));
+db.once("open", function() {
+  require("./app/routes")(app, db);
+  app.listen(port, () => {
+    console.log("We are live on localhost:" + port);
+  });
 });
-//});
