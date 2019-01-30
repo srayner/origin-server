@@ -4,7 +4,9 @@ module.exports = function(app, db) {
   // INDEX Families
   app.get("/families", (req, res) => {
     db.collection("families")
-      .find({})
+      .find({
+        treeId: req.query.treeId
+      })
       .toArray(function(err, result) {
         if (err) {
           res.send({ error: "An error occurred" });
