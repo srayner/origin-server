@@ -5,7 +5,7 @@ module.exports = function(app, db) {
   app.get("/families", (req, res) => {
     db.collection("families")
       .find({
-        treeId: req.query.treeId
+        tree: req.query.tree
       })
       .toArray(function(err, result) {
         if (err) {
