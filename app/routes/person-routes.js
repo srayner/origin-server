@@ -44,11 +44,12 @@ module.exports = function(app, db) {
   // UPDATE Person
   app.patch("/people/:id", (req, res) => {
     const id = req.params.id;
-    const query = { _id: new ObjectID(id) };
+    const query = { _id: id };
     const update = {
       $set: {
         forenames: req.body.forenames,
-        surname: req.body.surname
+        surname: req.body.surname,
+        parents: req.body.parents
       }
     };
     db.collection("people").updateOne(query, update, function(err, item) {

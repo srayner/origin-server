@@ -64,7 +64,7 @@ module.exports = function(app, db) {
   // DELETE Family
   app.delete("/families/:id", (req, res) => {
     const id = req.params.id;
-    const details = { _id: new ObjectID(id) };
+    const details = { _id: id };
     db.collection("families").remove(details, (err, item) => {
       if (err) {
         res.send({ error: "An error occured" });
