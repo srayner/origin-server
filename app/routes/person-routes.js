@@ -49,7 +49,13 @@ module.exports = function(app, db) {
       $set: {
         forenames: req.body.forenames,
         surname: req.body.surname,
-        parents: req.body.parents
+        gender: req.body.gender,
+        parents: req.body.parents,
+        spouces: req.body.spouces,
+        birth: req.body.birth,
+        birthPlace: req.body.birthPlace,
+        death: req.body.death,
+        deathPlace: req.body.deathPlace
       }
     };
     db.collection("people").updateOne(query, update, function(err, item) {
