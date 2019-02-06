@@ -31,7 +31,7 @@ module.exports = function(app, db) {
   // READ Family
   app.get("/families/:id", (req, res) => {
     const id = req.params.id;
-    const details = { _id: new ObjectID(id) };
+    const details = { _id: id };
     db.collection("families").findOne(details, (err, item) => {
       if (err) {
         res.send({ error: "An error has occured." });
@@ -44,7 +44,7 @@ module.exports = function(app, db) {
   // UPDATE Family
   app.patch("/families/:id", (req, res) => {
     const id = req.params.id;
-    const query = { _id: new ObjectID(id) };
+    const query = { _id: id };
     const update = {
       $set: {
         father: req.body.father,

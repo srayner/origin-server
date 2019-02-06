@@ -70,7 +70,7 @@ module.exports = function(app, db) {
   // DELETE Person
   app.delete("/people/:id", (req, res) => {
     const id = req.params.id;
-    const details = { _id: new ObjectID(id) };
+    const details = { _id: id };
     db.collection("people").remove(details, (err, item) => {
       if (err) {
         res.send({ error: "An error occured" });
