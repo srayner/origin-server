@@ -31,7 +31,7 @@ module.exports = function(app, db) {
   // READ Person
   app.get("/people/:id", (req, res) => {
     const id = req.params.id;
-    const details = { _id: new ObjectID(id) };
+    const details = { _id: id };
     db.collection("people").findOne(details, (err, item) => {
       if (err) {
         res.send({ error: "An error has occured." });
