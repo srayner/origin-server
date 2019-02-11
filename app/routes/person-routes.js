@@ -51,7 +51,7 @@ module.exports = function(app, db) {
         surname: req.body.surname,
         gender: req.body.gender,
         parents: req.body.parents,
-        spouces: req.body.spouces,
+        spouses: req.body.spouses,
         birth: req.body.birth,
         birthPlace: req.body.birthPlace,
         death: req.body.death,
