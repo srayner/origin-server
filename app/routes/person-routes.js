@@ -1,6 +1,12 @@
 var ObjectID = require("mongodb").ObjectID;
 
 module.exports = function(app, db) {
+  // fix
+  app.post("/people/fix", (req, res) => {
+    db.collection("people").updateMany({}, { $rename: { spouces: "spouses" } });
+    res.send("ok");
+  });
+
   // INDEX People
   app.get("/people", (req, res) => {
     db.collection("people")
