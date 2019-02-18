@@ -41,7 +41,6 @@ module.exports = function(app, db) {
 
   // USER login
   app.post("/user/login", (req, res) => {
-    console.log(process.env);
     User.find({ email: req.body.email })
       .exec()
       .then(users => {
