@@ -1,12 +1,14 @@
 var ObjectID = require("mongodb").ObjectID;
+const checkAuth = require("../middleware/check-auth");
 
 module.exports = function(app, db) {
   /**
    * Returns all trees.
    */
-  app.get("/trees", (req, res) => {
+  app.get("/trees", checkAuth, (req, res) => {
+    const userId = req.userData.userId;
     db.collection("trees")
-      .find({})
+      .find({ owner: ObjectID(userId) })
       .toArray(function(err, result) {
         if (err) {
           res.send({ error: "An error occurred" });
