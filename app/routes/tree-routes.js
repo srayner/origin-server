@@ -21,8 +21,10 @@ module.exports = function(app, db) {
   /**
    * Creates a new tree.
    */
-  app.post("/trees", (req, res) => {
+  app.post("/trees", checkAuth, (req, res) => {
+    const userId = req.userData.userId;
     const tree = req.body;
+    tree.owner = ObjectID(userId);
     db.collection("trees").insertOne(tree, (err, result) => {
       if (err) {
         res.send({ error: "An error has occurred" });
@@ -35,9 +37,10 @@ module.exports = function(app, db) {
   /**
    * Returns a single tree.
    */
-  app.get("/trees/:id", (req, res) => {
+  app.get("/trees/:id", checkAuth, (req, res) => {
+    const userId = req.userData.userId;
     const id = req.params.id;
-    const details = { _id: id };
+    const details = { _id: id, owner: ObjectID(userId) };
     db.collection("trees").findOne(details, (err, item) => {
       if (err) {
         res.send({ error: "An error has occured." });
@@ -50,19 +53,30 @@ module.exports = function(app, db) {
   /**
    * Updates a tree.
    */
-  app.patch("/trees/:id", (req, res) => {
+  app.patch("/trees/:id", checkAuth, (req, res) => {
+    const userId = req.userData.userId;
     const id = req.params.id;
     const query = { _id: id };
-    const update = {
-      $set: {
-        name: req.body.name
-      }
-    };
-    db.collection("trees").updateOne(query, update, function(err, item) {
+    db.collection("trees").findOne(query, (err, item) => {
       if (err) {
         res.send({ error: "An error has occured." });
       } else {
-        res.send({ message: "Tree " + id + " updated." });
+        if (!item.owner.equals(ObjectID(userId))) {
+          res.send(401, "Unauthorized.");
+        } else {
+          const update = {
+            $set: {
+              name: req.body.name
+            }
+          };
+          db.collection("trees").updateOne(query, update, function(err, item) {
+            if (err) {
+              res.send({ error: "An error has occured." });
+            } else {
+              res.send({ message: "Tree " + id + " updated." });
+            }
+          });
+        }
       }
     });
   });
@@ -70,14 +84,27 @@ module.exports = function(app, db) {
   /**
    * Deletes a tree.
    */
-  app.delete("/trees/:id", (req, res) => {
+  app.delete("/trees/:id", checkAuth, (req, res) => {
+    const userId = req.userData.userId;
     const id = req.params.id;
-    const details = { _id: id };
-    db.collection("trees").remove(details, (err, item) => {
+    const query = { _id: id };
+    db.collection("trees").findOne(query, (err, item) => {
       if (err) {
-        res.send({ error: "An error occured" });
+        res.send(500, { error: "An error has occured." });
+      } else if (!item) {
+        res.send(404, { error: "Tree not found." });
       } else {
-        res.send({ message: "Tree " + id + " deleted!" });
+        if (!item.owner.equals(ObjectID(userId))) {
+          res.send(401, "Unauthorized.");
+        } else {
+          db.collection("trees").remove(query, (err, item) => {
+            if (err) {
+              res.send({ error: "An error occured" });
+            } else {
+              res.send({ message: "Tree " + id + " deleted!" });
+            }
+          });
+        }
       }
     });
   });
