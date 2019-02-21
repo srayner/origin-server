@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const User = require("../model/user");
 const jwt = require("jsonwebtoken");
 const checkAuth = require("../middleware/check-auth");
+const mailer = require("../helpers/email");
 
 module.exports = function(app, db) {
   // USER signup
@@ -22,11 +23,13 @@ module.exports = function(app, db) {
               const user = new User({
                 _id: new mongoose.Types.ObjectId(),
                 email: req.body.email,
-                password: hash
+                password: hash,
+                verified: false
               });
               user
                 .save()
                 .then(result => {
+                  mailer(req.body.email);
                   res.status(201).json({ message: "User created." });
                 })
                 .catch(err => {
