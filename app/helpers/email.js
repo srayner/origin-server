@@ -9,15 +9,9 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-sendMail = toAddress => {
+sendMail = (to, subject, text) => {
   const from = process.env.EMAIL_FROM;
-  const to = toAddress;
-  const mailOptions = {
-    from: from,
-    to: to,
-    subject: "Sending Email using Node.js",
-    text: "That was easy!"
-  };
+  const mailOptions = { from, to, subject, text };
   transporter.sendMail(mailOptions, function(error, info) {
     if (error) {
       console.log(error);
@@ -27,6 +21,6 @@ sendMail = toAddress => {
   });
 };
 
-module.exports = toAddress => {
-  sendMail(toAddress);
+module.exports = (to, subject, text) => {
+  sendMail(to, subject, text);
 };

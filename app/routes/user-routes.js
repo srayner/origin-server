@@ -26,10 +26,21 @@ module.exports = function(app, db) {
                 password: hash,
                 verified: false
               });
+              const token = jwt.sign({ userId: user._id }, process.env.JWT_KEY);
+              const url = "http://localhost:3000/verify?token=" + token;
+              const link = '<a href="' + url + '">' + url + "</a>";
+              mailBody =
+                "Thanks for signing up to Origin Genealogy. To complete your registation click or " +
+                "paste this link into your browser: " +
+                link;
               user
                 .save()
                 .then(result => {
-                  mailer(req.body.email);
+                  mailer(
+                    req.body.email,
+                    "Origin Genealogy account verification.",
+                    mailBody
+                  );
                   res.status(201).json({ message: "User created." });
                 })
                 .catch(err => {
@@ -40,6 +51,26 @@ module.exports = function(app, db) {
         }
       })
       .catch();
+  });
+
+  // USER verify
+  app.post("/user/verify", (req, res) => {
+    try {
+      const token = req.token;
+      const decoded = jwt.verify(token, process.env.JWT_KEY);
+      User.find({ email: decoded.email })
+        .exec()
+        .then(users => {
+          if (users.length < 1) {
+            return res.status(400).json({ Message: "Bad request." });
+          }
+          user[0].verified = true;
+          user[0].save();
+          res.status(200).json({ Message: "User verified." });
+        });
+    } catch (error) {
+      return res.status(400).json({ message: "Bad request." });
+    }
   });
 
   // USER login
