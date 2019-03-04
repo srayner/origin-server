@@ -123,6 +123,33 @@ module.exports = function(app, db) {
       });
   });
 
+  // USER patch
+  app.patch("/users/:id", checkAuth, (req, res) => {
+    const id = req.params.id;
+    const details = { _id: new mongoose.Types.ObjectId(id) };
+    db.collection("users").findOne(details, (err, user) => {
+      if (err) {
+        res.send({ error: "An error has occured." });
+      } else {
+        const allowed = ["forenames", "surname", "address"];
+        const filtered = Object.keys(req.body)
+          .filter(key => allowed.includes(key))
+          .reduce((obj, key) => {
+            obj[key] = req.body[key];
+            return obj;
+          }, {});
+        const update = { $set: filtered };
+        db.collection("users").updateOne(details, update, function(err, item) {
+          if (err) {
+            res.send({ error: "An error has occured." });
+          } else {
+            res.send({ message: "User " + id + " updated." });
+          }
+        });
+      }
+    });
+  });
+
   // INDEX users
   app.get("/users", checkAuth, (req, res) => {
     db.collection("users")
