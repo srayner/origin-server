@@ -96,12 +96,23 @@ module.exports = function(app, db) {
                 },
                 process.env.JWT_KEY,
                 {
-                  expiresIn: "1h"
+                  expiresIn: "15m"
+                }
+              );
+              const refreshToken = jwt.sign(
+                {
+                  email: users[0].email,
+                  userId: users[0]._id
+                },
+                process.env.JWT_REFRESH_KEY,
+                {
+                  expiresIn: "24h"
                 }
               );
               return res.status(200).json({
                 message: "Login suceeded.",
-                token: token
+                token: token,
+                refreshToken: refreshToken
               });
             }
             return res.status(401).json({ Message: "Unauthorized." });
