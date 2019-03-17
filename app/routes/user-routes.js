@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const Token = require("../model/token");
 const User = require("../model/user");
 const jwt = require("jsonwebtoken");
 const checkAuth = require("../middleware/check-auth");
@@ -109,6 +110,14 @@ module.exports = function(app, db) {
                   expiresIn: "24h"
                 }
               );
+              db.collection("tokens").insertOne(
+                { refreshToken },
+                (err, result) => {
+                  if (err) {
+                    console.log(err);
+                  }
+                }
+              );
               return res.status(200).json({
                 message: "Login suceeded.",
                 token: token,
@@ -120,6 +129,32 @@ module.exports = function(app, db) {
         );
       })
       .catch();
+  });
+
+  // USER token refresh
+  app.post("/user/token", (req, res) => {
+    const postData = req.body;
+    if (postData.refreshToken) {
+      const refreshToken = postData.refreshToken;
+      Token.findOne({ refreshToken }, (err, data) => {
+        if (!data) {
+          res.status(404).json({ Message: "Not found." });
+        } else {
+          const decoded = jwt.verify(
+            data.refreshToken,
+            process.env.JWT_REFRESH_KEY
+          );
+          const token = jwt.sign(
+            { email: decoded.email, userId: decoded._id },
+            process.env.JWT_KEY,
+            { expiresIn: "15m" }
+          );
+          res.status(200).json({ token });
+        }
+      });
+    } else {
+      res.status(400).json({ Message: "Refresh token is required." });
+    }
   });
 
   // USER delete
