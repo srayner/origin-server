@@ -5,6 +5,7 @@ const User = require("../model/user");
 const jwt = require("jsonwebtoken");
 const checkAuth = require("../middleware/check-auth");
 const mailer = require("../helpers/email");
+const verifyEmail = require("../email/email-verify");
 
 module.exports = function(app, db) {
   // USER signup
@@ -28,20 +29,14 @@ module.exports = function(app, db) {
                 verified: false
               });
               const token = jwt.sign({ userId: user._id }, process.env.JWT_KEY);
-              const url = "http://localhost:3000/verify?token=" + token;
+              const url = process.env.LOCAL_SERVER + "/verify?token=" + token;
               const link = '<a href="' + url + '">' + url + "</a>";
-              mailBody =
-                "Thanks for signing up to Origin Genealogy. To complete your registation click or " +
-                "paste this link into your browser: " +
-                link;
+              const mailSubject = verifyEmail.subject;
+              const mailBody = verifyEmail.body(link);
               user
                 .save()
                 .then(result => {
-                  mailer(
-                    req.body.email,
-                    "Origin Genealogy account verification.",
-                    mailBody
-                  );
+                  mailer(req.body.email, mailSubject, mailBody);
                   res.status(201).json({ message: "User created." });
                 })
                 .catch(err => {
