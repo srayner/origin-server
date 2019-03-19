@@ -1,26 +1,40 @@
 const nodemailer = require("nodemailer");
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: 587,
-  secure: false,
+const mailgunTransport = require("nodemailer-mailgun-transport");
+
+const mailgunOptions = {
   auth: {
-    user: process.env.EMAIL_ACCOUNT,
-    pass: process.env.EMAIL_PASSWORD
+    api_key: process.env.MAILGUN_ACTIVE_API_KEY,
+    domain: process.env.MAILGUN_DOMAIN
   }
-});
-
-sendMail = (to, subject, text) => {
-  const from = process.env.EMAIL_FROM;
-  const mailOptions = { from, to, subject, text };
-  transporter.sendMail(mailOptions, function(error, info) {
-    if (error) {
-      console.log(error);
-    } else {
-      console.log("Email sent: " + info.response);
-    }
-  });
 };
 
-module.exports = (to, subject, text) => {
-  sendMail(to, subject, text);
-};
+console.log(mailgunOptions);
+const transport = mailgunTransport(mailgunOptions);
+
+// EmailService
+class EmailService {
+  constructor() {
+    this.emailClient = nodemailer.createTransport(transport);
+  }
+  sendMail(to, subject, text) {
+    return new Promise((resolve, reject) => {
+      this.emailClient.sendMail(
+        {
+          from: '"Origin Genealogy" <youraccount@origin.civrays.com>',
+          to,
+          subject,
+          text
+        },
+        (err, info) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(info);
+          }
+        }
+      );
+    });
+  }
+}
+
+module.exports = new EmailService();

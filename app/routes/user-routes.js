@@ -4,8 +4,8 @@ const Token = require("../model/token");
 const User = require("../model/user");
 const jwt = require("jsonwebtoken");
 const checkAuth = require("../middleware/check-auth");
-const mailer = require("../helpers/email");
 const verifyEmail = require("../email/email-verify");
+const EmailService = require("../helpers/email");
 
 module.exports = function(app, db) {
   // USER signup
@@ -36,7 +36,13 @@ module.exports = function(app, db) {
               user
                 .save()
                 .then(result => {
-                  mailer(req.body.email, mailSubject, mailBody);
+                  EmailService.sendMail(req.body.email, mailSubject, mailBody)
+                    .then(() => {
+                      console.log("Mail sent ok.");
+                    })
+                    .catch(err => {
+                      console.log("Error sending mail.", err);
+                    });
                   res.status(201).json({ message: "User created." });
                 })
                 .catch(err => {
