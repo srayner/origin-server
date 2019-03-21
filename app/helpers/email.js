@@ -16,14 +16,14 @@ class EmailService {
   constructor() {
     this.emailClient = nodemailer.createTransport(transport);
   }
-  sendMail(to, subject, text) {
+  sendMail(to, subject, html) {
     return new Promise((resolve, reject) => {
       this.emailClient.sendMail(
         {
           from: '"Origin Genealogy" <youraccount@origin.civrays.com>',
           to,
           subject,
-          text
+          html
         },
         (err, info) => {
           if (err) {
