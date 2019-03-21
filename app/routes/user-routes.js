@@ -57,20 +57,26 @@ module.exports = function(app, db) {
 
   // USER verify
   app.post("/user/verify", (req, res) => {
+    console.log("/user/verify");
     try {
-      const token = req.token;
+      const token = req.body.token;
+      console.log("token: " + token);
       const decoded = jwt.verify(token, process.env.JWT_KEY);
-      User.find({ email: decoded.email })
+      const details = { _id: new mongoose.Types.ObjectId(decoded.userId) };
+      console.log("decoded", decoded);
+      User.find(details)
         .exec()
         .then(users => {
+          console.log(users);
           if (users.length < 1) {
             return res.status(400).json({ Message: "Bad request." });
           }
-          user[0].verified = true;
-          user[0].save();
+          users[0].verified = true;
+          users[0].save();
           res.status(200).json({ Message: "User verified." });
         });
     } catch (error) {
+      console.log(error);
       return res.status(400).json({ message: "Bad request." });
     }
   });
