@@ -8,6 +8,18 @@ const verifyEmail = require("../email/email-verify");
 const EmailService = require("../helpers/email");
 
 module.exports = function(app, db) {
+  function getAccessToken(_id, email) {
+    return jwt.sign({ _id, email }, process.env.JWT_KEY, {
+      expiresIn: "15m"
+    });
+  }
+
+  function getRefreshToken(_id, email) {
+    return jwt.sign({ _id, email }, process.env.JWT_REFRESH_KEY, {
+      expiresIn: "24h"
+    });
+  }
+
   // USER signup
   app.post("/user/signup", (req, res) => {
     User.find({ email: req.body.email })
@@ -57,23 +69,22 @@ module.exports = function(app, db) {
 
   // USER verify
   app.post("/user/verify", (req, res) => {
-    console.log("/user/verify");
     try {
       const token = req.body.token;
-      console.log("token: " + token);
       const decoded = jwt.verify(token, process.env.JWT_KEY);
       const details = { _id: new mongoose.Types.ObjectId(decoded.userId) };
-      console.log("decoded", decoded);
       User.find(details)
         .exec()
         .then(users => {
-          console.log(users);
           if (users.length < 1) {
             return res.status(400).json({ Message: "Bad request." });
           }
           users[0].verified = true;
           users[0].save();
-          res.status(200).json({ Message: "User verified." });
+          const accessToken = getAccessToken(users[0]._id, users[0].email);
+          const refreshToken = getRefreshToken(users[0]._id, users[0].email);
+          const message = "User verified, and logged in.";
+          res.status(200).json({ message, accessToken, refreshToken });
         });
     } catch (error) {
       console.log(error);
