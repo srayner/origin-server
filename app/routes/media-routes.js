@@ -2,6 +2,21 @@ const IncomingForm = require("formidable").IncomingForm;
 const fs = require("fs");
 
 module.exports = function(app, db) {
+  // index
+  app.get("/media", (req, res) => {
+    db.collection("media")
+      .find({
+        person: req.query.person
+      })
+      .toArray(function(err, result) {
+        if (err) {
+          res.send({ error: "An error occurred" });
+        } else {
+          res.send(result);
+        }
+      });
+  });
+
   // uplad media
   app.post("/media", (req, res) => {
     const form = new IncomingForm();
