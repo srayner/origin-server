@@ -16,7 +16,7 @@ var allowCrossDomain = function(req, res, next) {
   next();
 };
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "20mb" }));
 app.use(allowCrossDomain);
 
 mongoose.connect("mongodb://mongo:27017/nucleus");
