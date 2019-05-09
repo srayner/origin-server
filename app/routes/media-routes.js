@@ -6,7 +6,7 @@ module.exports = function(app, db) {
   app.get("/media", (req, res) => {
     db.collection("media")
       .find({
-        person: req.query.personId
+        personId: req.query.personId
       })
       .toArray(function(err, result) {
         if (err) {
